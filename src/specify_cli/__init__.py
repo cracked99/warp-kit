@@ -53,6 +53,13 @@ import ssl
 import truststore
 from datetime import datetime, timezone
 
+# SDD initialization modules
+try:
+    from .init_hook import run_sdd_init_hook, format_sdd_summary, get_sdd_next_steps
+except ImportError:
+    # Fallback if modules not available
+    run_sdd_init_hook = None
+
 ssl_context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 client = httpx.Client(verify=ssl_context)
 
@@ -942,6 +949,7 @@ def init(
     skip_tls: bool = typer.Option(False, "--skip-tls", help="Skip SSL/TLS verification (not recommended)"),
     debug: bool = typer.Option(False, "--debug", help="Show verbose diagnostic output for network and extraction failures"),
     github_token: str = typer.Option(None, "--github-token", help="GitHub token to use for API requests (or set GH_TOKEN or GITHUB_TOKEN environment variable)"),
+    warp_spec: bool = typer.Option(False, "--warp-spec", help="Autonomously setup Spec-Driven Development (SDD) with WARP guidance"),
 ):
     """
     Initialize a new Specify project from the latest template.
@@ -1116,6 +1124,20 @@ def init(
 
             ensure_executable_scripts(project_path, tracker=tracker)
 
+            # Run SDD initialization if enabled
+            sdd_result = None
+            if run_sdd_init_hook and warp_spec:
+                tracker.add("sdd", "Setup Spec-Driven Development")
+                tracker.start("sdd")
+                try:
+                    sdd_result = run_sdd_init_hook(project_path, warp_spec_flag=warp_spec, verbose=False)
+                    if sdd_result:
+                        tracker.complete("sdd", f"{sdd_result.stack_id} detected")
+                    else:
+                        tracker.skip("sdd", "already SDD-enabled")
+                except Exception as e:
+                    tracker.error("sdd", str(e))
+
             if not no_git:
                 tracker.start("git")
                 if is_git_repo(project_path):
@@ -1153,6 +1175,12 @@ def init(
 
     console.print(tracker.render())
     console.print("\n[bold green]Project ready.[/bold green]")
+    
+    # Show SDD initialization summary if applicable
+    if sdd_result:
+        sdd_summary = format_sdd_summary(sdd_result) if format_sdd_summary else None
+        if sdd_summary:
+            console.print(sdd_summary)
     
     # Show git error details if initialization failed
     if git_error_message:
