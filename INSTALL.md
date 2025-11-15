@@ -1,23 +1,23 @@
-# Installation Guide - Specify CLI v0.2.0
+# Installation Guide - Warp Kit v0.4.0
 
 ## Quick Install (Recommended)
 
 ### Option 1: Using `uv` (Fastest)
 
 ```bash
-uv tool install git+https://github.com/cracked99/warp-kit@v0.2.0
+uv tool install git+https://github.com/cracked99/warp-kit@v0.4.0
 ```
 
 ### Option 2: Using `pip`
 
 ```bash
-pip install git+https://github.com/cracked99/warp-kit@v0.2.0
+pip install git+https://github.com/cracked99/warp-kit@v0.4.0
 ```
 
 ### Option 3: Using `pipx`
 
 ```bash
-pipx install git+https://github.com/cracked99/warp-kit@v0.2.0
+pipx install git+https://github.com/cracked99/warp-kit@v0.4.0
 ```
 
 ---
@@ -40,7 +40,7 @@ If you want to develop on the project or contribute:
 
 2. **Checkout the release tag:**
    ```bash
-   git checkout v0.2.0
+   git checkout v0.4.0
    ```
 
 3. **Create a virtual environment (optional but recommended):**
@@ -56,8 +56,8 @@ If you want to develop on the project or contribute:
 
 5. **Verify installation:**
    ```bash
-   specify --version
-   specify check
+   warp-kit --version
+   warp-kit check
    ```
 
 ---
@@ -68,35 +68,35 @@ After installation, verify that the CLI works:
 
 ```bash
 # Check version and system info
-specify version
+warp-kit version
 
 # Verify tools are installed
-specify check
+warp-kit check
 
 # See available commands
-specify --help
+warp-kit --help
 ```
 
 ---
 
 ## Usage with --warp-spec Flag
 
-The v0.2.0 release adds the `--warp-spec` flag for autonomous SDD initialization:
+The v0.4.0 release adds the `--warp-spec` flag for autonomous SDD initialization:
 
 ```bash
 # Initialize current project with SDD
-specify init --here --warp-spec
+warp-kit init --here --warp-spec
 
 # Create new project with SDD
-specify init my-project --warp-spec
+warp-kit init my-project --warp-spec
 
 # See full options
-specify init --help
+warp-kit init --help
 ```
 
 ---
 
-## What's New in v0.2.0
+## What's New in v0.4.0
 
 ✅ **Autonomous Stack Detection** - Detects Python, Node, Go, Java, Rust, .NET  
 ✅ **WARP.md Generation** - Creates project guidance files  
@@ -111,13 +111,13 @@ specify init --help
 
 ```bash
 # Using pip
-pip uninstall specify-cli
+pip uninstall warp-kit
 
 # Using pipx
-pipx uninstall specify-cli
+pipx uninstall warp-kit
 
 # Using uv
-uv tool uninstall specify-cli
+uv tool uninstall warp-kit
 ```
 
 ---
@@ -137,7 +137,7 @@ git --version
 ```
 
 ### Command Not Found
-If `specify` command is not found after installation:
+If `warp-kit` command is not found after installation:
 - With `pip`: Ensure the installation directory is in your PATH
 - With `pipx`: Run `pipx ensurepath`
 - With `uv`: The tool is managed by uv automatically
@@ -158,6 +158,6 @@ pip install --upgrade truststore
 
 ---
 
-**Release:** v0.2.0  
+**Release:** v0.4.0  
 **Released:** 2025-11-15  
 **Status:** Stable

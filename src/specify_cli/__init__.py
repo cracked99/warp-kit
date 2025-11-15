@@ -10,18 +10,18 @@
 # ]
 # ///
 """
-Specify CLI - Setup tool for Specify projects
+Warp Kit - Spec-Driven Development Toolkit
 
 Usage:
-    uvx specify-cli.py init <project-name>
-    uvx specify-cli.py init .
-    uvx specify-cli.py init --here
+    warp-kit init <project-name>
+    warp-kit init .
+    warp-kit init --here
 
 Or install globally:
-    uv tool install --from specify-cli.py specify-cli
-    specify init <project-name>
-    specify init .
-    specify init --here
+    uv tool install git+https://github.com/cracked99/warp-kit
+    warp-kit init <project-name>
+    warp-kit init .
+    warp-kit init --here
 """
 
 import os
@@ -435,8 +435,8 @@ class BannerGroup(TyperGroup):
 
 
 app = typer.Typer(
-    name="specify",
-    help="Setup tool for Specify spec-driven development projects",
+    name="warp-kit",
+    help="Spec-Driven Development Toolkit - Bootstrap your projects for SDD with AI agent integration",
     add_completion=False,
     invoke_without_command=True,
     cls=BannerGroup,
