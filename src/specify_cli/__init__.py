@@ -221,6 +221,12 @@ AGENT_CONFIG = {
         "install_url": "https://github.com/ovh/shai",
         "requires_cli": True,
     },
+    "warp": {
+        "name": "Warp",
+        "folder": ".warp/",
+        "install_url": "https://www.warp.dev",
+        "requires_cli": False,  # Warp is an IDE/terminal, no CLI check needed
+    },
 }
 
 SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
