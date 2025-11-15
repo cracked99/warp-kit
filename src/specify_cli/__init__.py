@@ -949,7 +949,7 @@ def init(
     skip_tls: bool = typer.Option(False, "--skip-tls", help="Skip SSL/TLS verification (not recommended)"),
     debug: bool = typer.Option(False, "--debug", help="Show verbose diagnostic output for network and extraction failures"),
     github_token: str = typer.Option(None, "--github-token", help="GitHub token to use for API requests (or set GH_TOKEN or GITHUB_TOKEN environment variable)"),
-    warp_spec: bool = typer.Option(False, "--warp-spec", help="Autonomously setup Spec-Driven Development (SDD) with WARP guidance"),
+    warp_spec: bool = typer.Option(False, "--warp-spec", help="Autonomously setup Spec-Driven Development (SDD) with WARP guidance (select an AI with --ai or interactively)"),
 ):
     """
     Initialize a new Specify project from the latest template.
@@ -961,6 +961,7 @@ def init(
     4. Extract the template to a new project directory or current directory
     5. Initialize a fresh git repository (if not --no-git and no existing repo)
     6. Optionally set up AI assistant commands
+    7. Optionally set up Spec-Driven Development (SDD) with --warp-spec
     
     Examples:
         specify init my-project
@@ -974,6 +975,11 @@ def init(
         specify init --here --ai codebuddy
         specify init --here
         specify init --here --force  # Skip confirmation when current directory not empty
+        specify init --here --ai claude --warp-spec  # Initialize with SDD setup
+        specify init --here --warp-spec  # Initialize with SDD (interactive AI selection)
+    
+    Note: When using --warp-spec, you must also select an AI assistant (via --ai flag or interactively).
+    The --warp-spec flag enables autonomous Spec-Driven Development setup after template extraction.
     """
 
     show_banner()
