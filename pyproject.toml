@@ -1,6 +1,6 @@
 [project]
 name = "warp-kit"
-version = "0.6.0"
+version = "0.7.0"
 description = "Warp Kit - A toolkit to bootstrap your projects for Spec-Driven Development (SDD) with AI agent integration."
 requires-python = ">=3.11"
 dependencies = [
