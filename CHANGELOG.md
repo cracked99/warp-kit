@@ -6,6 +6,17 @@ All notable changes to the Specify CLI and templates are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.9.3] - 2025-11-16
+
+### Fixed
+
+- Bundle all SDD data files (templates, commands, scripts) with package distribution
+- Updated pyproject.toml to include data files in wheel and source distributions
+- Updated sdd_bootstrap.py to use importlib.resources for reliable package data access
+- All .warp-space infrastructure files now properly available in installed packages
+- Improved package portability across different installation methods
+
 ## [0.9.2] - 2025-11-16
 
 ### Added
