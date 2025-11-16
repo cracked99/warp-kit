@@ -68,16 +68,16 @@ WARPSPACE_TEMPLATE = """# Warp-space.md – {{PROJECT_NAME}} Central Source of T
 
 This file is the single source of truth for the project's Spec-Driven Development (SDD) architecture.
 
-It references and coordinates all SDD artifacts stored in the `.warpify/` directory.
+It references and coordinates all SDD artifacts stored in the `.warp-space/` directory.
 
 ---
 
-## .warpify Directory Structure
+## .warp-space Directory Structure
 
-The `.warpify/` directory contains all SDD governance and metadata:
+The `.warp-space/` directory contains all SDD governance and metadata:
 
 ```
-.warpify/
+.warp-space/
 ├── Warp-space.md             ← You are here (single source of truth)
 ├── core/
 │   └── architecture.md       # Overall system design and principles
@@ -100,7 +100,7 @@ The `.warpify/` directory contains all SDD governance and metadata:
 
 This section maps all SDD artifacts and their purposes:
 
-### Constitution (.warpify/memory/constitution.md)
+### Constitution (.warp-space/memory/constitution.md)
 **Purpose:** Encodes project-wide principles, quality standards, and constraints.
 
 **Contains:**
@@ -127,7 +127,7 @@ specs/
 │   └── ...              # Supporting docs
 ```
 
-### Templates (.warpify/templates/)
+### Templates (.warp-space/templates/)
 **Purpose:** Standard formats for specs, plans, and tasks.
 
 **Files:**
@@ -135,10 +135,10 @@ specs/
 - `plan-template.md` – Use when designing technical approach
 - `tasks-template.md` – Use when breaking work into tasks
 
-### Agent Commands (.warpify/commands/)
+### Agent Commands (.warp-space/commands/)
 **Purpose:** Agent-specific command definitions and workflows.
 
-### Helper Scripts (.warpify/scripts/)
+### Helper Scripts (.warp-space/scripts/)
 **Purpose:** Automation and utility scripts for SDD workflows.
 
 ---
@@ -343,9 +343,9 @@ def create_warpspace(
     project_root: Path,
 ) -> Tuple[bool, str]:
     """
-    Create or update .warpify/Warp-space.md as the single source of truth.
+    Create or update .warp-space/Warp-space.md as the single source of truth.
     
-    Also removes any legacy Warp-gate.md files.
+    Also removes any legacy files/directories.
     
     Args:
         project_root: Root directory of the project
@@ -354,15 +354,19 @@ def create_warpspace(
         (was_created: bool, action: str) tuple
     """
     
-    warpify_dir = project_root / ".warpify"
-    warpify_dir.mkdir(parents=True, exist_ok=True)
+    warp_space_dir = project_root / ".warp-space"
+    warp_space_dir.mkdir(parents=True, exist_ok=True)
     
-    warpspace_path = warpify_dir / "Warp-space.md"
-    warpgate_path = warpify_dir / "Warp-gate.md"  # Legacy path
+    warpspace_path = warp_space_dir / "Warp-space.md"
     
-    # Remove legacy Warp-gate.md if it exists
+    # Remove legacy files if they exist
+    warpgate_path = warp_space_dir / "Warp-gate.md"
+    old_warpify_dir = project_root / ".warpify"
     if warpgate_path.exists():
         warpgate_path.unlink()
+    if old_warpify_dir.exists():
+        import shutil
+        shutil.rmtree(old_warpify_dir)
     
     # Create or update Warp-space.md
     created_date = datetime.now().strftime("%Y-%m-%d")
@@ -395,7 +399,7 @@ def create_or_update_constitution(
         (was_created: bool, action: str) tuple
     """
     
-    memory_dir = project_root / ".warpify" / "memory"
+    memory_dir = project_root / ".warp-space" / "memory"
     memory_dir.mkdir(parents=True, exist_ok=True)
     
     const_path = memory_dir / "constitution.md"
@@ -419,11 +423,11 @@ def create_or_update_constitution(
 
 def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up specs/ directory with README and templates.
+    Set up specs/ directory with README and .warp-space/templates.
     
     Creates:
     - specs/README.md
-    - .warpify/templates/{spec,plan,tasks}-template.md
+    - .warp-space/templates/{spec,plan,tasks}-template.md
     
     Args:
         project_root: Root directory of the project
@@ -446,8 +450,8 @@ def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
     else:
         actions.append((False, "specs_readme_exists"))
     
-    # Create .warpify/templates/
-    templates_dir = project_root / ".warpify" / "templates"
+    # Create .warp-space/templates/
+    templates_dir = project_root / ".warp-space" / "templates"
     templates_dir.mkdir(parents=True, exist_ok=True)
     
     templates = [
@@ -469,7 +473,7 @@ def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
 
 def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up .warpify/commands/ directory with stub agent command files.
+    Set up .warp-space/commands/ directory with agent command files.
     
     Args:
         project_root: Root directory of the project
@@ -480,30 +484,35 @@ def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
     
     actions = []
     
-    agents_dir = project_root / ".warpify" / "commands"
-    agents_dir.mkdir(parents=True, exist_ok=True)
+    commands_dir = project_root / ".warp-space" / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
     
-    # Create placeholder for agent commands
-    # In production, these would be copied from templates/commands/
-    agent_stub = """# Agent Command Placeholder
-
-This directory will contain agent-specific command definitions.
-In a full implementation, these are populated from the main templates/commands/ directory.
-"""
+    # Agent commands to populate
+    agent_commands = [
+        ("constitution.md", "# /speckit.constitution\n\nCreate or refine project principles."),
+        ("specify.md", "# /speckit.specify\n\nCreate or refine the specification."),
+        ("clarify.md", "# /speckit.clarify\n\nClarify ambiguous requirements."),
+        ("plan.md", "# /speckit.plan\n\nCreate the technical implementation plan."),
+        ("tasks.md", "# /speckit.tasks\n\nGenerate implementation tasks."),
+        ("implement.md", "# /speckit.implement\n\nExecute implementation tasks."),
+        ("analyze.md", "# /speckit.analyze\n\nCross-artifact consistency check."),
+        ("checklist.md", "# /speckit.checklist\n\nGenerate quality checklists."),
+    ]
     
-    stub_file = agents_dir / "README.md"
-    if not stub_file.exists():
-        stub_file.write_text(agent_stub)
-        actions.append((True, "created_agents_readme"))
-    else:
-        actions.append((False, "agents_readme_exists"))
+    for cmd_name, cmd_content in agent_commands:
+        cmd_path = commands_dir / cmd_name
+        if not cmd_path.exists():
+            cmd_path.write_text(cmd_content)
+            actions.append((True, f"created_{cmd_name}"))
+        else:
+            actions.append((False, f"{cmd_name}_exists"))
     
     return actions
 
 
-def setup_warpify_scripts(project_root: Path) -> List[Tuple[bool, str]]:
+def setup_warp_space_scripts(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up .warpify/scripts/ directories.
+    Set up .warp-space/scripts/ directories.
     
     Args:
         project_root: Root directory of the project
@@ -514,7 +523,7 @@ def setup_warpify_scripts(project_root: Path) -> List[Tuple[bool, str]]:
     
     actions = []
     
-    scripts_dir = project_root / ".warpify" / "scripts"
+    scripts_dir = project_root / ".warp-space" / "scripts"
     
     # Create bash and powershell subdirectories
     for script_type in ["bash", "powershell"]:

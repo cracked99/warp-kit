@@ -18,7 +18,7 @@ from .sdd_bootstrap import (
     create_or_update_constitution,
     setup_specs_directory,
     setup_agent_commands,
-    setup_warpify_scripts,
+    setup_warp_space_scripts,
 )
 
 
@@ -129,7 +129,7 @@ def run_sdd_initialization(
         try:
             # Warp-space.md (single source of truth)
             create_warpspace(project_root)
-            result.add_message("Created .warpify/Warp-space.md (single source of truth)")
+            result.add_message("Created .warp-space/Warp-space.md (single source of truth)")
             
             # Constitution
             was_created, action = create_or_update_constitution(
@@ -137,7 +137,7 @@ def run_sdd_initialization(
             )
             if was_created:
                 result.constitution_created = True
-                result.add_message("Created constitution (.warpify/memory/constitution.md)")
+                result.add_message("Created constitution (.warp-space/memory/constitution.md)")
             else:
                 result.constitution_preserved = True
                 result.add_message("Preserved existing constitution")
@@ -155,7 +155,7 @@ def run_sdd_initialization(
                 result.add_message("Set up agent command directories")
             
             # Scripts
-            script_actions = setup_warpify_scripts(project_root)
+            script_actions = setup_warp_space_scripts(project_root)
             if any(created for created, _ in script_actions):
                 result.scripts_setup = True
                 result.add_message("Set up helper scripts directories")
@@ -200,8 +200,8 @@ def get_next_steps(result: InitializationResult) -> list:
     """
     
     steps = [
-        "✓ Review .warpify/Warp-space.md (single source of truth)",
-        "✓ Review .warpify/memory/constitution.md for project principles",
+        "✓ Review .warp-space/Warp-space.md (single source of truth)",
+        "✓ Review .warp-space/memory/constitution.md for project principles",
     ]
     
     if result.specs_setup:
