@@ -333,6 +333,239 @@ TASKS_TEMPLATE = """# {{FEATURE_NAME}} Tasks
 - [ ] Deployed/Merged
 """
 
+# Embedded command files - bundled with package for distribution
+COMMAND_CONSTITUTION = """---
+description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
+handoffs: 
+  - label: Build Specification
+    agent: speckit.specify
+    prompt: Implement the feature specification based on the updated constitution. I want to build...
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+You are updating the project constitution at `/memory/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_SPECIFY = """---
+description: Create or update the feature specification from a natural language feature description.
+handoffs: 
+  - label: Build Technical Plan
+    agent: speckit.plan
+    prompt: Create a plan for the spec. I am building with...
+  - label: Clarify Spec Requirements
+    agent: speckit.clarify
+    prompt: Clarify specification requirements
+    send: true
+scripts:
+  sh: scripts/bash/create-new-feature.sh --json "{ARGS}"
+  ps: scripts/powershell/create-new-feature.ps1 -Json "{ARGS}"
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Create or update feature specifications. The feature description from the user input becomes the basis for detailed requirements gathering.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_CLARIFY = """---
+description: Identify underspecified areas in the current feature spec by asking targeted clarification questions.
+handoffs: 
+  - label: Build Technical Plan
+    agent: speckit.plan
+    prompt: Create a plan for the spec. I am building with...
+scripts:
+   sh: scripts/bash/check-prerequisites.sh --json --paths-only
+   ps: scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Goal: Detect and reduce ambiguity or missing decision points in the active feature specification and record the clarifications directly in the spec file.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_PLAN = """---
+description: Execute the implementation planning workflow using the plan template to generate design artifacts.
+handoffs: 
+  - label: Create Tasks
+    agent: speckit.tasks
+    prompt: Break the plan into tasks
+    send: true
+  - label: Create Checklist
+    agent: speckit.checklist
+    prompt: Create a checklist for the following domain...
+scripts:
+  sh: scripts/bash/setup-plan.sh --json
+  ps: scripts/powershell/setup-plan.ps1 -Json
+agent_scripts:
+  sh: scripts/bash/update-agent-context.sh __AGENT__
+  ps: scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Execute the implementation planning workflow. Design the technical approach based on the feature specification.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_TASKS = """---
+description: Break down the implementation plan into ordered, traceable tasks with dependencies and acceptance criteria.
+scripts:
+  sh: scripts/bash/check-prerequisites.sh --json --require-plan --require-tasks
+  ps: scripts/powershell/check-prerequisites.ps1 -Json -RequirePlan -RequireTasks
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Break the implementation plan into ordered, actionable tasks with clear dependencies and acceptance criteria.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_IMPLEMENT = """---
+description: Execute implementation tasks in order, validating completion against acceptance criteria.
+scripts:
+  sh: scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
+  ps: scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Execute implementation based on the tasks breakdown. Validate each task against acceptance criteria.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_ANALYZE = """---
+description: Analyze cross-artifact consistency and alignment of specification, plan, and tasks.
+scripts:
+  sh: scripts/bash/check-prerequisites.sh --json
+  ps: scripts/powershell/check-prerequisites.ps1 -Json
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Analyze consistency between specification, implementation plan, and task breakdown. Report any divergences.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_CHECKLIST = """---
+description: Generate quality and acceptance checklists for features or implementation phases.
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Generate quality checklists to validate requirements completeness, clarity, and consistency.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_TASKSTOISSUES = """---
+description: Convert existing tasks into actionable, dependency-ordered GitHub issues.
+tools: ['github/github-mcp-server/issue_write']
+scripts:
+  sh: scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
+  ps: scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Outline
+
+Convert tasks into GitHub issues for tracking and collaboration.
+
+For more details, see the full command documentation in your project's `.warp-space/commands/` directory.
+"""
+
+COMMAND_MAP = {
+    "constitution.md": COMMAND_CONSTITUTION,
+    "specify.md": COMMAND_SPECIFY,
+    "clarify.md": COMMAND_CLARIFY,
+    "plan.md": COMMAND_PLAN,
+    "tasks.md": COMMAND_TASKS,
+    "implement.md": COMMAND_IMPLEMENT,
+    "analyze.md": COMMAND_ANALYZE,
+    "checklist.md": COMMAND_CHECKLIST,
+    "taskstoissues.md": COMMAND_TASKSTOISSUES,
+}
+
 
 # ============================================================================
 # Bootstrap Functions
@@ -475,7 +708,7 @@ def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
 
 def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up .warp-space/commands/ directory with agent command files.
+    Set up .warp-space/commands/ directory with agent command files from warp-kit templates.
     
     Args:
         project_root: Root directory of the project
@@ -489,23 +722,36 @@ def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
     commands_dir = project_root / ".warp-space" / "commands"
     commands_dir.mkdir(parents=True, exist_ok=True)
     
-    # Agent commands to populate
-    agent_commands = [
-        ("constitution.md", "# /speckit.constitution\n\nCreate or refine project principles."),
-        ("specify.md", "# /speckit.specify\n\nCreate or refine the specification."),
-        ("clarify.md", "# /speckit.clarify\n\nClarify ambiguous requirements."),
-        ("plan.md", "# /speckit.plan\n\nCreate the technical implementation plan."),
-        ("tasks.md", "# /speckit.tasks\n\nGenerate implementation tasks."),
-        ("implement.md", "# /speckit.implement\n\nExecute implementation tasks."),
-        ("analyze.md", "# /speckit.analyze\n\nCross-artifact consistency check."),
-        ("checklist.md", "# /speckit.checklist\n\nGenerate quality checklists."),
-        ("taskstoissues.md", "# /speckit.taskstoissues\n\nConvert tasks into GitHub issues."),
+    # Get the template directory from warp-kit
+    # This file is in src/specify_cli/, so templates are in ../../../templates/commands/
+    template_dir = Path(__file__).parent.parent.parent / "templates" / "commands"
+    
+    # List of command files to copy
+    command_files = [
+        "constitution.md",
+        "specify.md",
+        "clarify.md",
+        "plan.md",
+        "tasks.md",
+        "implement.md",
+        "analyze.md",
+        "checklist.md",
+        "taskstoissues.md",
     ]
     
-    for cmd_name, cmd_content in agent_commands:
+    for cmd_name in command_files:
         cmd_path = commands_dir / cmd_name
+        template_path = template_dir / cmd_name
+        
         if not cmd_path.exists():
-            cmd_path.write_text(cmd_content)
+            # Try to read from template directory
+            if template_path.exists():
+                content = template_path.read_text()
+            else:
+                # Fallback: minimal placeholder
+                content = f"# /speckit.{cmd_name.replace('.md', '')}\n\nCommand documentation.\n"
+            
+            cmd_path.write_text(content)
             actions.append((True, f"created_{cmd_name}"))
         else:
             actions.append((False, f"{cmd_name}_exists"))
