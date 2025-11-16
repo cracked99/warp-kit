@@ -20,6 +20,8 @@ from .sdd_bootstrap import (
     setup_agent_commands,
     setup_warp_space_scripts,
     setup_warp_space_config,
+    setup_warp_space_agents,
+    setup_warp_space_core,
 )
 
 
@@ -170,6 +172,16 @@ def run_sdd_initialization(
             config_actions = setup_warp_space_config(project_root)
             if any(created for created, _ in config_actions):
                 result.add_message("Created configuration files")
+            
+            # Agents directory
+            agents_actions = setup_warp_space_agents(project_root)
+            if any(created for created, _ in agents_actions):
+                result.add_message("Set up agent configuration directory")
+            
+            # Core architecture directory
+            core_actions = setup_warp_space_core(project_root)
+            if any(created for created, _ in core_actions):
+                result.add_message("Set up core architecture directory")
         
         except Exception as e:
             result.add_message(f"Warning: SDD bootstrap failed: {e}")

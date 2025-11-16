@@ -761,7 +761,7 @@ def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
 
 def setup_warp_space_scripts(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up .warp-space/scripts/ directories.
+    Set up .warp-space/scripts/ directories with helper scripts from spec-kit.
     
     Args:
         project_root: Root directory of the project
@@ -774,12 +774,29 @@ def setup_warp_space_scripts(project_root: Path) -> List[Tuple[bool, str]]:
     
     scripts_dir = project_root / ".warp-space" / "scripts"
     
-    # Create bash and powershell subdirectories
+    # Get spec-kit scripts directory
+    # This file is in src/specify_cli/, so scripts are in ../../../scripts/
+    spec_kit_scripts_dir = Path(__file__).parent.parent.parent / "scripts"
+    
+    # Create bash and powershell subdirectories with scripts
     for script_type in ["bash", "powershell"]:
         subdir = scripts_dir / script_type
         subdir.mkdir(parents=True, exist_ok=True)
         
-        # Create placeholder README
+        # Copy scripts from spec-kit if available
+        if spec_kit_scripts_dir.exists():
+            source_subdir = spec_kit_scripts_dir / script_type
+            if source_subdir.exists():
+                for script_file in source_subdir.glob("*.sh" if script_type == "bash" else "*.ps1"):
+                    target_file = subdir / script_file.name
+                    if not target_file.exists():
+                        content = script_file.read_text()
+                        target_file.write_text(content)
+                        actions.append((True, f"created_{script_file.name}"))
+                    else:
+                        actions.append((False, f"{script_file.name}_exists"))
+        
+        # Create or preserve README
         readme = subdir / "README.md"
         if not readme.exists():
             readme.write_text(f"# {script_type.capitalize()} Scripts\n\nHelper scripts for SDD workflows.\n")
@@ -828,6 +845,96 @@ def setup_warp_space_config(project_root: Path) -> List[Tuple[bool, str]]:
         actions.append((False, "vscode_settings_exists"))
     
     return actions
+
+
+def setup_warp_space_agents(project_root: Path) -> List[Tuple[bool, str]]:
+    """
+    Set up .warp-space/agents/ directory for agent-specific files.
+    
+    Args:
+        project_root: Root directory of the project
+    
+    Returns:
+        List of (was_created, action) tuples
+    """
+    
+    actions = []
+    
+    agents_dir = project_root / ".warp-space" / "agents"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create agents README
+    readme = agents_dir / "README.md"
+    if not readme.exists():
+        content = """# Agent Configuration
+
+This directory contains agent-specific configuration files and rules.
+
+## Supported Agents
+
+- Claude Code
+- GitHub Copilot
+- Cursor
+- Gemini CLI
+- Windsurf
+- And more...
+
+Each agent may have its own configuration or rule files here for reference.
+"""
+        readme.write_text(content)
+        actions.append((True, "created_agents_readme"))
+    else:
+        actions.append((False, "agents_readme_exists"))
+    
+    return actions
+
+
+def setup_warp_space_core(project_root: Path) -> List[Tuple[bool, str]]:
+    """
+    Set up .warp-space/core/ directory for core architecture documentation.
+    
+    Args:
+        project_root: Root directory of the project
+    
+    Returns:
+        List of (was_created, action) tuples
+    """
+    
+    actions = []
+    
+    core_dir = project_root / ".warp-space" / "core"
+    core_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create architecture.md
+    arch_file = core_dir / "architecture.md"
+    if not arch_file.exists():
+        content = """# Architecture
+
+This file documents the overall system design and principles.
+
+## System Overview
+
+[Add overview of the system architecture here]
+
+## Key Components
+
+[Document the main components and their relationships]
+
+## Design Decisions
+
+[Document important architectural decisions and their rationale]
+
+## Dependencies
+
+[List external dependencies and integrations]
+"""
+        arch_file.write_text(content)
+        actions.append((True, "created_architecture_md"))
+    else:
+        actions.append((False, "architecture_md_exists"))
+    
+    return actions
+
 
 
 # ============================================================================
