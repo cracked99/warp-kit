@@ -27,3 +27,12 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/specify_cli"]
 
+
+[tool.hatch.build.targets.wheel.force-include]
+# Include all data files needed for SDD initialization
+templates = "templates"
+scripts = "scripts"
+
+[tool.hatch.build.targets.sdist.force-include]
+templates = "templates"
+scripts = "scripts"

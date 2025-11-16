@@ -722,9 +722,14 @@ def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
     commands_dir = project_root / ".warp-space" / "commands"
     commands_dir.mkdir(parents=True, exist_ok=True)
     
-    # Get the template directory from warp-kit
-    # This file is in src/specify_cli/, so templates are in ../../../templates/commands/
-    template_dir = Path(__file__).parent.parent.parent / "templates" / "commands"
+    # Get the template directory from warp-kit package data
+    # Use importlib.resources to get the bundled templates
+    try:
+        from importlib.resources import files
+        template_dir = Path(str(files('specify_cli').parent / "templates" / "commands"))
+    except (ImportError, TypeError):
+        # Fallback for older Python versions or dev installs
+        template_dir = Path(__file__).parent.parent.parent / "templates" / "commands"
     
     # List of command files to copy
     command_files = [
@@ -774,9 +779,13 @@ def setup_warp_space_scripts(project_root: Path) -> List[Tuple[bool, str]]:
     
     scripts_dir = project_root / ".warp-space" / "scripts"
     
-    # Get spec-kit scripts directory
-    # This file is in src/specify_cli/, so scripts are in ../../../scripts/
-    spec_kit_scripts_dir = Path(__file__).parent.parent.parent / "scripts"
+    # Get spec-kit scripts directory from package data
+    try:
+        from importlib.resources import files
+        spec_kit_scripts_dir = Path(str(files('specify_cli').parent / "scripts"))
+    except (ImportError, TypeError):
+        # Fallback for older Python versions or dev installs
+        spec_kit_scripts_dir = Path(__file__).parent.parent.parent / "scripts"
     
     # Create bash and powershell subdirectories with scripts
     for script_type in ["bash", "powershell"]:
