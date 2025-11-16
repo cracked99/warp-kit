@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from .project_detection import detect_project_stack, detect_sdd_artifacts
-from .warp_generation import generate_root_warp, generate_subdir_warps
+from .warp_generation import generate_root_warp, generate_subdir_warps, upsert_warp
 from .sdd_bootstrap import (
     create_warpspace,
     create_or_update_constitution,
@@ -113,12 +113,17 @@ def run_sdd_initialization(
     if not skip_warp and detected_stack:
         try:
             # Generate root WARP
-            warp_path = generate_root_warp(project_root, detected_stack, sdd_status)
-            result.warp_created = True
+            warp_content = generate_root_warp(detected_stack, project_root)
+            warp_path = project_root / "WARP.md"
+            was_created, action = upsert_warp(warp_path, warp_content)
+            if was_created:
+                result.warp_created = True
+            else:
+                result.warp_updated = True
             result.add_message(f"Generated root WARP.md")
             
             # Generate subdirectory WARPs
-            subdirs_created = generate_subdir_warps(project_root, detected_stack)
+            subdirs_created = generate_subdir_warps(detected_stack, project_root)
             if subdirs_created:
                 result.add_message(f"Generated {len(subdirs_created)} subdirectory WARP files")
         

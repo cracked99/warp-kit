@@ -1163,7 +1163,8 @@ def init(
 
             # Run SDD initialization if enabled
             sdd_result = None
-            if run_sdd_init_hook and warp_spec:
+            # Ensure SDD (warp-space) is initialized when explicitly requested or when using --here
+            if run_sdd_init_hook and (warp_spec or here):
                 tracker.add("sdd", "Setup Spec-Driven Development")
                 tracker.start("sdd")
                 try:

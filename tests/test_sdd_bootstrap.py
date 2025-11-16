@@ -16,10 +16,12 @@ from tempfile import TemporaryDirectory
 
 from specify_cli.project_detection import DetectedStack, SDDStatus
 from specify_cli.sdd_bootstrap import (
+    create_warpspace,
     create_or_update_constitution,
     setup_specs_directory,
     setup_agent_commands,
-    setup_specify_scripts,
+    setup_warp_space_scripts,
+    setup_warp_space_config,
 )
 
 
@@ -77,7 +79,7 @@ def test_create_constitution_new(temp_project_root, sample_stack, sample_sdd_sta
     assert was_created is True
     assert action == "created"
     
-    const_file = temp_project_root / "memory" / "constitution.md"
+    const_file = temp_project_root / ".warp-space" / "memory" / "constitution.md"
     assert const_file.exists()
     
     content = const_file.read_text()
@@ -89,8 +91,8 @@ def test_create_constitution_new(temp_project_root, sample_stack, sample_sdd_sta
 def test_create_constitution_preserves_existing(temp_project_root, sample_stack, sample_sdd_status):
     """Test that existing constitution is preserved."""
     # Create existing constitution
-    memory_dir = temp_project_root / "memory"
-    memory_dir.mkdir()
+    memory_dir = temp_project_root / ".warp-space" / "memory"
+    memory_dir.mkdir(parents=True)
     const_file = memory_dir / "constitution.md"
     original_content = "# My Custom Constitution\n\nCustom content"
     const_file.write_text(original_content)
@@ -135,7 +137,7 @@ def test_constitution_contains_stack_specific_notes(temp_project_root, sample_sd
         
         assert was_created is True
         
-        const_file = temp_project_root / stack_id / "memory" / "constitution.md"
+        const_file = temp_project_root / stack_id / ".warp-space" / "memory" / "constitution.md"
         content = const_file.read_text()
         
         # Check for stack-specific content
@@ -154,7 +156,7 @@ def test_constitution_project_name_substitution(temp_project_root, sample_stack,
     
     create_or_update_constitution(project_with_name, sample_stack, sample_sdd_status)
     
-    const_file = project_with_name / "memory" / "constitution.md"
+    const_file = project_with_name / ".warp-space" / "memory" / "constitution.md"
     content = const_file.read_text()
     
     assert "my-project Constitution" in content
@@ -181,7 +183,7 @@ def test_setup_specs_creates_templates(temp_project_root):
     """Test that specs directory setup creates template files."""
     actions = setup_specs_directory(temp_project_root)
     
-    templates_dir = temp_project_root / ".specify" / "templates"
+    templates_dir = temp_project_root / ".warp-space" / "templates"
     assert templates_dir.exists()
     
     template_files = [
@@ -218,9 +220,9 @@ def test_specs_templates_have_placeholders(temp_project_root):
     """Test that templates contain placeholder variables."""
     setup_specs_directory(temp_project_root)
     
-    spec_template = temp_project_root / ".specify" / "templates" / "spec-template.md"
-    plan_template = temp_project_root / ".specify" / "templates" / "plan-template.md"
-    tasks_template = temp_project_root / ".specify" / "templates" / "tasks-template.md"
+    spec_template = temp_project_root / ".warp-space" / "templates" / "spec-template.md"
+    plan_template = temp_project_root / ".warp-space" / "templates" / "plan-template.md"
+    tasks_template = temp_project_root / ".warp-space" / "templates" / "tasks-template.md"
     
     # All should have FEATURE_NAME placeholder
     assert "{{FEATURE_NAME}}" in spec_template.read_text()
@@ -237,11 +239,8 @@ def test_setup_agent_commands_creates_dir(temp_project_root):
     """Test that agent commands setup creates directory."""
     actions = setup_agent_commands(temp_project_root)
     
-    agents_dir = temp_project_root / ".specify" / "agents"
-    assert agents_dir.exists()
-    
-    readme = agents_dir / "README.md"
-    assert readme.exists()
+    commands_dir = temp_project_root / ".warp-space" / "commands"
+    assert commands_dir.exists()
 
 
 def test_setup_agent_commands_idempotent(temp_project_root):
@@ -261,12 +260,12 @@ def test_setup_agent_commands_idempotent(temp_project_root):
 # ============================================================================
 
 
-def test_setup_specify_scripts_creates_directories(temp_project_root):
+def test_setup_warp_space_scripts_creates_directories(temp_project_root):
     """Test that scripts setup creates bash and powershell directories."""
-    actions = setup_specify_scripts(temp_project_root)
+    actions = setup_warp_space_scripts(temp_project_root)
     
-    bash_dir = temp_project_root / ".specify" / "scripts" / "bash"
-    ps_dir = temp_project_root / ".specify" / "scripts" / "powershell"
+    bash_dir = temp_project_root / ".warp-space" / "scripts" / "bash"
+    ps_dir = temp_project_root / ".warp-space" / "scripts" / "powershell"
     
     assert bash_dir.exists()
     assert ps_dir.exists()
@@ -275,24 +274,24 @@ def test_setup_specify_scripts_creates_directories(temp_project_root):
     assert (ps_dir / "README.md").exists()
 
 
-def test_setup_specify_scripts_idempotent(temp_project_root):
-    """Test that setup_specify_scripts is idempotent."""
-    actions_1 = setup_specify_scripts(temp_project_root)
+def test_setup_warp_space_scripts_idempotent(temp_project_root):
+    """Test that setup_warp_space_scripts is idempotent."""
+    actions_1 = setup_warp_space_scripts(temp_project_root)
     created_count_1 = sum(1 for created, _ in actions_1 if created)
     
-    actions_2 = setup_specify_scripts(temp_project_root)
+    actions_2 = setup_warp_space_scripts(temp_project_root)
     created_count_2 = sum(1 for created, _ in actions_2 if created)
     
     assert created_count_2 == 0
     assert created_count_1 > 0
 
 
-def test_setup_specify_scripts_content(temp_project_root):
+def test_setup_warp_space_scripts_content(temp_project_root):
     """Test that scripts READMEs have appropriate content."""
-    setup_specify_scripts(temp_project_root)
+    setup_warp_space_scripts(temp_project_root)
     
-    bash_readme = temp_project_root / ".specify" / "scripts" / "bash" / "README.md"
-    ps_readme = temp_project_root / ".specify" / "scripts" / "powershell" / "README.md"
+    bash_readme = temp_project_root / ".warp-space" / "scripts" / "bash" / "README.md"
+    ps_readme = temp_project_root / ".warp-space" / "scripts" / "powershell" / "README.md"
     
     assert "Helper scripts" in bash_readme.read_text()
     assert "Helper scripts" in ps_readme.read_text()
@@ -306,33 +305,35 @@ def test_setup_specify_scripts_content(temp_project_root):
 def test_full_bootstrap_creates_structure(temp_project_root, sample_stack, sample_sdd_status):
     """Test that running all bootstrap functions creates expected structure."""
     # Run all bootstrap functions
+    create_warpspace(temp_project_root)
     create_or_update_constitution(temp_project_root, sample_stack, sample_sdd_status)
     setup_specs_directory(temp_project_root)
     setup_agent_commands(temp_project_root)
-    setup_specify_scripts(temp_project_root)
+    setup_warp_space_scripts(temp_project_root)
+    setup_warp_space_config(temp_project_root)
     
     # Verify structure
     expected_dirs = [
-        "memory",
+        ".warp-space/memory",
         "specs",
-        ".specify/templates",
-        ".specify/agents",
-        ".specify/scripts/bash",
-        ".specify/scripts/powershell",
+        ".warp-space/templates",
+        ".warp-space/commands",
+        ".warp-space/scripts/bash",
+        ".warp-space/scripts/powershell",
     ]
     
     for dir_path in expected_dirs:
         assert (temp_project_root / dir_path).exists()
     
     expected_files = [
-        "memory/constitution.md",
+        ".warp-space/Warp-space.md",
+        ".warp-space/memory/constitution.md",
         "specs/README.md",
-        ".specify/templates/spec-template.md",
-        ".specify/templates/plan-template.md",
-        ".specify/templates/tasks-template.md",
-        ".specify/agents/README.md",
-        ".specify/scripts/bash/README.md",
-        ".specify/scripts/powershell/README.md",
+        ".warp-space/templates/spec-template.md",
+        ".warp-space/templates/plan-template.md",
+        ".warp-space/templates/tasks-template.md",
+        ".warp-space/scripts/bash/README.md",
+        ".warp-space/scripts/powershell/README.md",
     ]
     
     for file_path in expected_files:

@@ -7,6 +7,25 @@ All notable changes to the Specify CLI and templates are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2025-11-16
+
+### Added
+
+- Automatic `.warp-space` initialization when using `specify init --here` command
+- SDD (Spec-Driven Development) infrastructure now automatically created in existing projects
+- Complete `.warp-space` directory structure with templates, commands, and configuration
+
+### Fixed
+
+- Fixed WARP generation function call signatures in CLI integration
+- Corrected parameter order for `generate_root_warp` and `generate_subdir_warps` functions
+- Updated test suite to properly validate `.warp-space` directory structure
+
+### Changed
+
+- SDD initialization now triggers automatically with `--here` flag (in addition to `--warp-spec`)
+- Improved user experience when bootstrapping existing projects with Spec Kit
+
 ## [0.0.22] - 2025-11-07
 
 - Support for VS Code/Copilot agents, and moving away from prompts to proper agents with hand-offs.
