@@ -6,6 +6,36 @@ All notable changes to the Specify CLI and templates are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.9.2] - 2025-11-16
+
+### Added
+
+- Complete `.warp-space` directory structure as replacement for `.specify`
+- `.warp-space/commands/` with 9 spec-kit command templates (constitution, specify, clarify, plan, tasks, implement, analyze, checklist, taskstoissues)
+- `.warp-space/agents/` for agent-specific configuration and reference
+- `.warp-space/core/` with architecture.md for design documentation
+- `setup_warp_space_agents()` and `setup_warp_space_core()` functions for complete SDD bootstrap
+- Script copying from spec-kit in `setup_warp_space_scripts()`
+
+### Changed
+
+- Updated `setup_warp_space_scripts()` to copy actual scripts from spec-kit instead of creating placeholders
+- CLI integration now orchestrates complete `.warp-space` creation with all 7 subdirectories
+- All templates, commands, and scripts now synchronized with official spec-kit repository
+
+### Fixed
+
+- Proper `.warp-space` initialization when using `--here` command
+- Idempotent creation of all SDD infrastructure directories
+
+### Verified
+
+- 9 command files (bytewise identical with spec-kit)
+- 5 template files (bytewise identical with spec-kit)
+- 10 script files (bash & powershell from spec-kit)
+- `vscode-settings.json` for IDE integration
+- `Warp-space.md` as single source of truth
+
 
 ## [0.9.1] - 2025-11-16
 
