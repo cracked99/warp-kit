@@ -749,11 +749,21 @@ def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
         template_path = template_dir / cmd_name
         
         if not cmd_path.exists():
-            # Try to read from template directory
+            content = None
+            
+            # First, try to read from template directory
             if template_path.exists():
-                content = template_path.read_text()
-            else:
-                # Fallback: minimal placeholder
+                try:
+                    content = template_path.read_text()
+                except Exception:
+                    content = None
+            
+            # If file doesn't exist or read failed, try embedded templates
+            if not content and cmd_name in COMMAND_MAP:
+                content = COMMAND_MAP[cmd_name]
+            
+            # Final fallback: minimal placeholder
+            if not content:
                 content = f"# /speckit.{cmd_name.replace('.md', '')}\n\nCommand documentation.\n"
             
             cmd_path.write_text(content)
