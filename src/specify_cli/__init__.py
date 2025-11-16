@@ -653,16 +653,41 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
             headers=_github_auth_headers(github_token),
         )
         status = response.status_code
-        if status != 200:
+        
+        # If /releases/latest returns 404, try the /releases endpoint and get the first one
+        if status == 404:
+            if verbose:
+                console.print("[dim]/releases/latest not available, trying /releases endpoint...[/dim]")
+            api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
+            response = client.get(
+                api_url,
+                timeout=30,
+                follow_redirects=True,
+                headers=_github_auth_headers(github_token),
+            )
+            status = response.status_code
+            if status == 200:
+                releases = response.json()
+                if not releases:
+                    raise RuntimeError("No releases found in repository")
+                release_data = releases[0]  # Get the first (latest) release
+            else:
+                # Format detailed error message with rate-limit info
+                error_msg = _format_rate_limit_error(status, response.headers, api_url)
+                if debug:
+                    error_msg += f"\n\n[dim]Response body (truncated 500):[/dim]\n{response.text[:500]}"
+                raise RuntimeError(error_msg)
+        elif status != 200:
             # Format detailed error message with rate-limit info
             error_msg = _format_rate_limit_error(status, response.headers, api_url)
             if debug:
                 error_msg += f"\n\n[dim]Response body (truncated 500):[/dim]\n{response.text[:500]}"
             raise RuntimeError(error_msg)
-        try:
-            release_data = response.json()
-        except ValueError as je:
-            raise RuntimeError(f"Failed to parse release JSON: {je}\nRaw (truncated 400): {response.text[:400]}")
+        else:
+            try:
+                release_data = response.json()
+            except ValueError as je:
+                raise RuntimeError(f"Failed to parse release JSON: {je}\nRaw (truncated 400): {response.text[:400]}")
     except Exception as e:
         console.print(f"[red]Error fetching release information[/red]")
         console.print(Panel(str(e), title="Fetch Error", border_style="red"))
