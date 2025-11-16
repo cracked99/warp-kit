@@ -1164,11 +1164,14 @@ def init(
             # Run SDD initialization if enabled
             sdd_result = None
             # Ensure SDD (warp-space) is initialized when explicitly requested or when using --here
-            if run_sdd_init_hook and (warp_spec or here):
+            # When --here is used, always run with warp_spec=True to force complete bootstrap
+            should_run_sdd = run_sdd_init_hook and (warp_spec or here)
+            warp_spec_flag_for_boot = warp_spec or here  # Force full bootstrap if --here
+            if should_run_sdd:
                 tracker.add("sdd", "Setup Spec-Driven Development")
                 tracker.start("sdd")
                 try:
-                    sdd_result = run_sdd_init_hook(project_path, warp_spec_flag=warp_spec, verbose=False)
+                    sdd_result = run_sdd_init_hook(project_path, warp_spec_flag=warp_spec_flag_for_boot, verbose=False)
                     if sdd_result:
                         tracker.complete("sdd", f"{sdd_result.stack_id} detected")
                     else:
