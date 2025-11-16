@@ -19,6 +19,7 @@ from .sdd_bootstrap import (
     setup_specs_directory,
     setup_agent_commands,
     setup_warp_space_scripts,
+    setup_warp_space_config,
 )
 
 
@@ -159,6 +160,11 @@ def run_sdd_initialization(
             if any(created for created, _ in script_actions):
                 result.scripts_setup = True
                 result.add_message("Set up helper scripts directories")
+            
+            # Configuration files
+            config_actions = setup_warp_space_config(project_root)
+            if any(created for created, _ in config_actions):
+                result.add_message("Created configuration files")
         
         except Exception as e:
             result.add_message(f"Warning: SDD bootstrap failed: {e}")
