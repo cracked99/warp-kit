@@ -295,9 +295,10 @@ def detect_sdd_artifacts(root: Path) -> SDDStatus:
     Detect existing SDD artifacts in a project.
     
     Checks for:
-    - memory/constitution.md
+    - .warpify/Warp-space.md (single source of truth)
+    - .warpify/memory/constitution.md
     - specs/ directory
-    - .specify/ directory
+    - .warpify/ directory
     - WARP.md (root and subdirectories)
     
     Args:
@@ -307,9 +308,10 @@ def detect_sdd_artifacts(root: Path) -> SDDStatus:
         SDDStatus indicating which SDD artifacts are present
     """
     
-    has_constitution = (root / "memory" / "constitution.md").exists()
+    has_warpspace = (root / ".warpify" / "Warp-space.md").exists()
+    has_constitution = (root / ".warpify" / "memory" / "constitution.md").exists()
     has_specs = (root / "specs").is_dir()
-    has_specify_dir = (root / ".specify").is_dir()
+    has_warpify_dir = (root / ".warpify").is_dir()
     has_warp_root = (root / "WARP.md").exists()
     
     # Check for subdirectory WARPs
@@ -321,7 +323,7 @@ def detect_sdd_artifacts(root: Path) -> SDDStatus:
     return SDDStatus(
         has_constitution=has_constitution,
         has_specs=has_specs,
-        has_specify_dir=has_specify_dir,
+        has_specify_dir=has_warpify_dir,  # Still use this field for backward compat
         has_warp_root=has_warp_root,
         has_warp_subdirs=has_warp_subdirs,
     )

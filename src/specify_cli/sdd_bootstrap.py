@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-SDD Bootstrap Module - Bootstrap Spec-Driven Development artifacts.
+Warpify Bootstrap Module - Bootstrap Spec-Driven Development artifacts.
 
 This module provides:
+- Warp-gate.md creation as single source of truth
 - Constitution creation (stack-specific)
 - Specs directory structure setup
 - Base templates for specs/plans/tasks
@@ -12,6 +13,7 @@ This module provides:
 
 from typing import List, Tuple
 from pathlib import Path
+from datetime import datetime
 
 from .project_detection import DetectedStack, SDDStatus
 
@@ -60,6 +62,106 @@ Code is organized by responsibility and functionality. Maintain clear separation
 - Specs are updated if behavior changes during implementation
 
 **Version:** 1.0 | **Ratified:** 2025-11-15 | **Last Amended:** 2025-11-15
+"""
+
+WARPSPACE_TEMPLATE = """# Warp-space.md – {{PROJECT_NAME}} Central Source of Truth
+
+This file is the single source of truth for the project's Spec-Driven Development (SDD) architecture.
+
+It references and coordinates all SDD artifacts stored in the `.warpify/` directory.
+
+---
+
+## .warpify Directory Structure
+
+The `.warpify/` directory contains all SDD governance and metadata:
+
+```
+.warpify/
+├── Warp-space.md             ← You are here (single source of truth)
+├── core/
+│   └── architecture.md       # Overall system design and principles
+├── memory/
+│   └── constitution.md       # Project principles, quality bars, constraints
+├── commands/
+│   └── <agent-name>.md       # Agent-specific command definitions
+├── templates/
+│   ├── spec-template.md      # Specification template
+│   ├── plan-template.md      # Implementation plan template
+│   └── tasks-template.md     # Task breakdown template
+└── scripts/
+    ├── bash/                 # Bash helper scripts
+    └── powershell/           # PowerShell helper scripts
+```
+
+---
+
+## Artifact Map
+
+This section maps all SDD artifacts and their purposes:
+
+### Constitution (.warpify/memory/constitution.md)
+**Purpose:** Encodes project-wide principles, quality standards, and constraints.
+
+**Contains:**
+- Core development principles (SDD, testing, code quality)
+- Stack-specific guidance  
+- Development workflow
+- Quality gates and acceptance criteria
+
+**When to Use:**
+- Refer to when making design decisions
+- Update when project standards change
+- Ratified by team; changes require consensus
+
+### Specifications (specs/)
+**Purpose:** Functional requirements and user stories for individual features.
+
+**Structure:**
+```
+specs/
+├── 001-feature-name/
+│   ├── spec.md          # WHAT and WHY the feature exists
+│   ├── plan.md          # HOW to implement it
+│   ├── tasks.md         # Ordered, traceable tasks
+│   └── ...              # Supporting docs
+```
+
+### Templates (.warpify/templates/)
+**Purpose:** Standard formats for specs, plans, and tasks.
+
+**Files:**
+- `spec-template.md` – Use when creating a new feature specification
+- `plan-template.md` – Use when designing technical approach
+- `tasks-template.md` – Use when breaking work into tasks
+
+### Agent Commands (.warpify/commands/)
+**Purpose:** Agent-specific command definitions and workflows.
+
+### Helper Scripts (.warpify/scripts/)
+**Purpose:** Automation and utility scripts for SDD workflows.
+
+---
+
+## How to Use This Project
+
+### For New Features
+1. Create a directory in `specs/` (e.g., `specs/001-user-auth/`)
+2. Use `/speckit.specify` to create `spec.md` (WHAT and WHY)
+3. Use `/speckit.clarify` to record edge cases and decisions
+4. Use `/speckit.plan` to design the technical approach in `plan.md`
+5. Use `/speckit.tasks` to break into ordered tasks in `tasks.md`
+6. Use `/speckit.implement` to execute the tasks
+7. Validate that implementation matches the spec
+
+---
+
+## Metadata
+
+**Created:** {{CREATED_DATE}}
+**Last Updated:** {{CREATED_DATE}}
+**SDD Version:** 1.0
+**Project:** {{PROJECT_NAME}}
 """
 
 SPECS_README = """# Specifications
@@ -237,13 +339,50 @@ TASKS_TEMPLATE = """# {{FEATURE_NAME}} Tasks
 # ============================================================================
 
 
+def create_warpspace(
+    project_root: Path,
+) -> Tuple[bool, str]:
+    """
+    Create or update .warpify/Warp-space.md as the single source of truth.
+    
+    Also removes any legacy Warp-gate.md files.
+    
+    Args:
+        project_root: Root directory of the project
+    
+    Returns:
+        (was_created: bool, action: str) tuple
+    """
+    
+    warpify_dir = project_root / ".warpify"
+    warpify_dir.mkdir(parents=True, exist_ok=True)
+    
+    warpspace_path = warpify_dir / "Warp-space.md"
+    warpgate_path = warpify_dir / "Warp-gate.md"  # Legacy path
+    
+    # Remove legacy Warp-gate.md if it exists
+    if warpgate_path.exists():
+        warpgate_path.unlink()
+    
+    # Create or update Warp-space.md
+    created_date = datetime.now().strftime("%Y-%m-%d")
+    content = WARPSPACE_TEMPLATE.replace(
+        "{{PROJECT_NAME}}", project_root.name
+    ).replace(
+        "{{CREATED_DATE}}", created_date
+    )
+    
+    warpspace_path.write_text(content)
+    return (True, "created")
+
+
 def create_or_update_constitution(
     project_root: Path,
     stack: DetectedStack,
     sdd_status: SDDStatus,
 ) -> Tuple[bool, str]:
     """
-    Create or update memory/constitution.md with stack-specific principles.
+    Create or update .warpify/memory/constitution.md with stack-specific principles.
     
     If constitution exists, it is preserved (not overwritten).
     
@@ -256,7 +395,7 @@ def create_or_update_constitution(
         (was_created: bool, action: str) tuple
     """
     
-    memory_dir = project_root / "memory"
+    memory_dir = project_root / ".warpify" / "memory"
     memory_dir.mkdir(parents=True, exist_ok=True)
     
     const_path = memory_dir / "constitution.md"
@@ -284,7 +423,7 @@ def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
     
     Creates:
     - specs/README.md
-    - .specify/templates/{spec,plan,tasks}-template.md
+    - .warpify/templates/{spec,plan,tasks}-template.md
     
     Args:
         project_root: Root directory of the project
@@ -307,8 +446,8 @@ def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
     else:
         actions.append((False, "specs_readme_exists"))
     
-    # Create .specify/templates/
-    templates_dir = project_root / ".specify" / "templates"
+    # Create .warpify/templates/
+    templates_dir = project_root / ".warpify" / "templates"
     templates_dir.mkdir(parents=True, exist_ok=True)
     
     templates = [
@@ -330,7 +469,7 @@ def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
 
 def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up .specify/agents/ directory with stub agent command files.
+    Set up .warpify/commands/ directory with stub agent command files.
     
     Args:
         project_root: Root directory of the project
@@ -341,7 +480,7 @@ def setup_agent_commands(project_root: Path) -> List[Tuple[bool, str]]:
     
     actions = []
     
-    agents_dir = project_root / ".specify" / "agents"
+    agents_dir = project_root / ".warpify" / "commands"
     agents_dir.mkdir(parents=True, exist_ok=True)
     
     # Create placeholder for agent commands
@@ -362,9 +501,9 @@ In a full implementation, these are populated from the main templates/commands/ 
     return actions
 
 
-def setup_specify_scripts(project_root: Path) -> List[Tuple[bool, str]]:
+def setup_warpify_scripts(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up .specify/scripts/ directories.
+    Set up .warpify/scripts/ directories.
     
     Args:
         project_root: Root directory of the project
@@ -375,7 +514,7 @@ def setup_specify_scripts(project_root: Path) -> List[Tuple[bool, str]]:
     
     actions = []
     
-    scripts_dir = project_root / ".specify" / "scripts"
+    scripts_dir = project_root / ".warpify" / "scripts"
     
     # Create bash and powershell subdirectories
     for script_type in ["bash", "powershell"]:

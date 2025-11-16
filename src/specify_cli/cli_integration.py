@@ -14,10 +14,11 @@ from typing import Optional, Tuple
 from .project_detection import detect_project_stack, detect_sdd_artifacts
 from .warp_generation import generate_root_warp, generate_subdir_warps
 from .sdd_bootstrap import (
+    create_warpspace,
     create_or_update_constitution,
     setup_specs_directory,
     setup_agent_commands,
-    setup_specify_scripts,
+    setup_warpify_scripts,
 )
 
 
@@ -126,13 +127,17 @@ def run_sdd_initialization(
     # Phase 4: Bootstrap SDD artifacts
     if detected_stack:
         try:
+            # Warp-space.md (single source of truth)
+            create_warpspace(project_root)
+            result.add_message("Created .warpify/Warp-space.md (single source of truth)")
+            
             # Constitution
             was_created, action = create_or_update_constitution(
                 project_root, detected_stack, sdd_status
             )
             if was_created:
                 result.constitution_created = True
-                result.add_message("Created constitution (memory/constitution.md)")
+                result.add_message("Created constitution (.warpify/memory/constitution.md)")
             else:
                 result.constitution_preserved = True
                 result.add_message("Preserved existing constitution")
@@ -150,7 +155,7 @@ def run_sdd_initialization(
                 result.add_message("Set up agent command directories")
             
             # Scripts
-            script_actions = setup_specify_scripts(project_root)
+            script_actions = setup_warpify_scripts(project_root)
             if any(created for created, _ in script_actions):
                 result.scripts_setup = True
                 result.add_message("Set up helper scripts directories")
@@ -195,8 +200,8 @@ def get_next_steps(result: InitializationResult) -> list:
     """
     
     steps = [
-        "✓ Review the generated WARP.md file for project guidance",
-        "✓ Review memory/constitution.md for project principles",
+        "✓ Review .warpify/Warp-space.md (single source of truth)",
+        "✓ Review .warpify/memory/constitution.md for project principles",
     ]
     
     if result.specs_setup:
