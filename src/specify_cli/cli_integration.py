@@ -154,7 +154,7 @@ def run_sdd_initialization(
             specs_actions = setup_specs_directory(project_root)
             if any(created for created, _ in specs_actions):
                 result.specs_setup = True
-                result.add_message("Set up specs/ directory with templates")
+                result.add_message("Set up .warp-space/specs/ directory with templates")
             
             # Agent commands
             agent_actions = setup_agent_commands(project_root)
@@ -228,7 +228,7 @@ def get_next_steps(result: InitializationResult) -> list:
     ]
     
     if result.specs_setup:
-        steps.append("✓ Check specs/README.md for SDD workflow guidance")
+        steps.append("✓ Check .warp-space/specs/README.md for SDD workflow guidance")
     
     steps.extend([
         "",

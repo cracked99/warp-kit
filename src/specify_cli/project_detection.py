@@ -310,7 +310,7 @@ def detect_sdd_artifacts(root: Path) -> SDDStatus:
     
     has_warpspace = (root / ".warp-space" / "Warp-space.md").exists()
     has_constitution = (root / ".warp-space" / "memory" / "constitution.md").exists()
-    has_specs = (root / "specs").is_dir()
+    has_specs = (root / ".warp-space" / "specs").is_dir()
     has_warp_space_dir = (root / ".warp-space").is_dir()
     has_warp_root = (root / "WARP.md").exists()
     

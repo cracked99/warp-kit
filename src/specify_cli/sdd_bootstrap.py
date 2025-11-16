@@ -656,10 +656,10 @@ def create_or_update_constitution(
 
 def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
     """
-    Set up specs/ directory with README and .warp-space/templates.
+    Set up .warp-space/specs/ directory with README and templates.
     
     Creates:
-    - specs/README.md
+    - .warp-space/specs/README.md
     - .warp-space/templates/{spec,plan,tasks}-template.md
     
     Args:
@@ -671,9 +671,9 @@ def setup_specs_directory(project_root: Path) -> List[Tuple[bool, str]]:
     
     actions = []
     
-    # Create specs/ directory
-    specs_dir = project_root / "specs"
-    specs_dir.mkdir(exist_ok=True)
+    # Create .warp-space/specs/ directory
+    specs_dir = project_root / ".warp-space" / "specs"
+    specs_dir.mkdir(parents=True, exist_ok=True)
     
     # Create specs/README.md
     specs_readme = specs_dir / "README.md"
